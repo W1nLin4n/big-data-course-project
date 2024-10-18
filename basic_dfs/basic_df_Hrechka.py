@@ -1,7 +1,9 @@
 import pyspark.sql.types as t
 from pyspark.sql import SparkSession
+from pyspark.sql.dataframe import DataFrame
 
-def basic_test_df(session: SparkSession):
+
+def basic_test_df(session: SparkSession) -> DataFrame:
     data = [("Apple", 10., 5.5), ("Banana", 30., 2.4), ("Orange", 25., 3.)]
     schema = t.StructType([
         t.StructField("name", t.StringType(), False),
