@@ -1,0 +1,7 @@
+# Folder with datasets
+data
+
+# Unnecessary files
+.gitignore
+Dockerfile
+README.md

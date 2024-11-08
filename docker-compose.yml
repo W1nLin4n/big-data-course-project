@@ -1,0 +1,5 @@
+services:
+  spark-cluster:
+    build: .
+    volumes:
+      - ./data:/data
