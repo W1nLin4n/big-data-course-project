@@ -343,3 +343,6 @@ cython_debug/
 
 # Folder with datasets
 data
+
+# Settings file
+setting.py
