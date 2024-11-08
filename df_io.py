@@ -2,7 +2,7 @@ from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql import types as t
 from pyspark.sql import functions as F
 
-from setting import FILE_PATHS
+from setting import FILE_PATHS, RESULTS_FILE_PATHS
 
 
 def read_df(spark: SparkSession, schema: t.StructType, path: str) -> DataFrame:
@@ -143,3 +143,88 @@ def read_title_ratings_df(spark: SparkSession) -> DataFrame:
     ])
     df = read_df(spark, schema, FILE_PATHS["title_ratings"])
     return df
+
+def write_df(df: DataFrame, path):
+    df.write.csv(
+        path,
+        mode="overwrite",
+        sep="\t",
+        header=True,
+        nullValue=r"\N",
+        encoding="utf-8"
+    )
+
+def write_name_basics_df(df: DataFrame):
+    transformed_df = (
+        df
+        .withColumn(
+            "primaryProfession",
+            F.array_join(F.col("primaryProfession"), ",")
+        )
+        .withColumn(
+            "knownForTitles",
+            F.array_join(F.col("knownForTitles"), ",")
+        )
+    )
+    write_df(transformed_df, RESULTS_FILE_PATHS["name_basics"])
+
+def write_title_akas_df(df: DataFrame):
+    transformed_df = (
+        df
+        .withColumn(
+            "types",
+            F.array_join(F.col("types"), ",")
+        )
+        .withColumn(
+            "attributes",
+            F.array_join(F.col("attributes"), ",")
+        )
+        .withColumn(
+            "isOriginalTitle",
+            F.when(
+                F.col("isOriginalTitle"),
+                1
+            ).otherwise(0)
+        )
+    )
+    write_df(transformed_df, RESULTS_FILE_PATHS["title_akas"])
+
+def write_title_basics_df(df: DataFrame):
+    transformed_df = (
+        df
+        .withColumn(
+            "isAdult",
+            F.when(
+                F.col("isAdult"),
+                1
+            ).otherwise(0)
+        )
+        .withColumn(
+            "genres",
+            F.array_join(F.col("genres"), ",")
+        )
+    )
+    write_df(transformed_df, RESULTS_FILE_PATHS["title_basics"])
+
+def write_title_crew_df(df: DataFrame):
+    transformed_df = (
+        df
+        .withColumn(
+            "directors",
+            F.array_join(F.col("directors"), ",")
+        )
+        .withColumn(
+            "writers",
+            F.array_join(F.col("writers"), ",")
+        )
+    )
+    write_df(transformed_df, RESULTS_FILE_PATHS["title_crew"])
+
+def write_title_episode_df(df: DataFrame):
+    write_df(df, RESULTS_FILE_PATHS["title_episode"])
+
+def write_title_principals_df(df: DataFrame):
+    write_df(df, RESULTS_FILE_PATHS["title_principals"])
+
+def write_title_ratings_df(df: DataFrame):
+    write_df(df, RESULTS_FILE_PATHS["title_ratings"])
