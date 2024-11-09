@@ -28,3 +28,29 @@ def array_to_string_df(df: DataFrame, cols: list[str] | str) -> DataFrame:
             )
         )
     return df
+
+def int_to_bool_df(df: DataFrame, cols: list[str] | str) -> DataFrame:
+    if type(cols) == str:
+        cols = [cols]
+    for col in cols:
+        df = (
+            df
+            .withColumn(
+                col,
+                F.col(col).cast("boolean")
+            )
+        )
+    return df
+
+def bool_to_int_df(df: DataFrame, cols: list[str] | str) -> DataFrame:
+    if type(cols) == str:
+        cols = [cols]
+    for col in cols:
+        df = (
+            df
+            .withColumn(
+                col,
+                F.col(col).cast("int")
+            )
+        )
+    return df
