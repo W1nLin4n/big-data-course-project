@@ -2,7 +2,8 @@ from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql import types as t
 from pyspark.sql import functions as F
 
-from postprocessing import string_to_array_df, array_to_string_df, int_to_bool_df, bool_to_int_df
+from postprocessing import string_to_array_df, array_to_string_df, int_to_bool_df, bool_to_int_df, \
+    camel_to_snake_case_df, snake_to_camel_case_df
 from setting import FILE_PATHS, RESULTS_FILE_PATHS
 
 
@@ -27,6 +28,7 @@ def read_name_basics_df(spark: SparkSession) -> DataFrame:
     ])
     df = read_df(spark, schema, FILE_PATHS["name_basics"])
     df = string_to_array_df(df, ["primaryProfession", "knownForTitles"])
+    df = camel_to_snake_case_df(df)
     return df
 
 def read_title_akas_df(spark: SparkSession) -> DataFrame:
@@ -43,6 +45,7 @@ def read_title_akas_df(spark: SparkSession) -> DataFrame:
     df = read_df(spark, schema, FILE_PATHS["title_akas"])
     df = string_to_array_df(df, ["types", "attributes"])
     df = int_to_bool_df(df, "isOriginalTitle")
+    df = camel_to_snake_case_df(df)
     return df
 
 def read_title_basics_df(spark: SparkSession) -> DataFrame:
@@ -60,6 +63,7 @@ def read_title_basics_df(spark: SparkSession) -> DataFrame:
     df = read_df(spark, schema, FILE_PATHS["title_basics"])
     df = string_to_array_df(df, "genres")
     df = int_to_bool_df(df, "isAdult")
+    df = camel_to_snake_case_df(df)
     return df
 
 def read_title_crew_df(spark: SparkSession) -> DataFrame:
@@ -80,6 +84,7 @@ def read_title_episode_df(spark: SparkSession) -> DataFrame:
         t.StructField("episodeNumber", t.IntegerType(), True)
     ])
     df = read_df(spark, schema, FILE_PATHS["title_episode"])
+    df = camel_to_snake_case_df(df)
     return df
 
 def read_title_principals_df(spark: SparkSession) -> DataFrame:
@@ -92,6 +97,7 @@ def read_title_principals_df(spark: SparkSession) -> DataFrame:
         t.StructField("characters", t.StringType(), True)
     ])
     df = read_df(spark, schema, FILE_PATHS["title_principals"])
+    df = camel_to_snake_case_df(df)
     return df
 
 def read_title_ratings_df(spark: SparkSession) -> DataFrame:
@@ -101,6 +107,7 @@ def read_title_ratings_df(spark: SparkSession) -> DataFrame:
         t.StructField("numVotes", t.StringType(), True)
     ])
     df = read_df(spark, schema, FILE_PATHS["title_ratings"])
+    df = camel_to_snake_case_df(df)
     return df
 
 def write_df(df: DataFrame, path):
@@ -114,28 +121,35 @@ def write_df(df: DataFrame, path):
     )
 
 def write_name_basics_df(df: DataFrame):
+    df = snake_to_camel_case_df(df)
     df = array_to_string_df(df, ["primaryProfession", "knownForTitles"])
     write_df(df, RESULTS_FILE_PATHS["name_basics"])
 
 def write_title_akas_df(df: DataFrame):
+    df = snake_to_camel_case_df(df)
     df = array_to_string_df(df, ["types", "attributes"])
     df = bool_to_int_df(df, "isOriginalTitle")
     write_df(df, RESULTS_FILE_PATHS["title_akas"])
 
 def write_title_basics_df(df: DataFrame):
+    df = snake_to_camel_case_df(df)
     df = array_to_string_df(df, "genres")
     df = bool_to_int_df(df, "isAdult")
     write_df(df, RESULTS_FILE_PATHS["title_basics"])
 
 def write_title_crew_df(df: DataFrame):
+    df = snake_to_camel_case_df(df)
     df = array_to_string_df(df, ["directors", "writers"])
     write_df(df, RESULTS_FILE_PATHS["title_crew"])
 
 def write_title_episode_df(df: DataFrame):
+    df = snake_to_camel_case_df(df)
     write_df(df, RESULTS_FILE_PATHS["title_episode"])
 
 def write_title_principals_df(df: DataFrame):
+    df = snake_to_camel_case_df(df)
     write_df(df, RESULTS_FILE_PATHS["title_principals"])
 
 def write_title_ratings_df(df: DataFrame):
+    df = snake_to_camel_case_df(df)
     write_df(df, RESULTS_FILE_PATHS["title_ratings"])
