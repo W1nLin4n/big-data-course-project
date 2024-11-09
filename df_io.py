@@ -2,6 +2,7 @@ from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql import types as t
 from pyspark.sql import functions as F
 
+from postprocessing import string_to_array_df, array_to_string_df
 from setting import FILE_PATHS, RESULTS_FILE_PATHS
 
 
@@ -25,17 +26,7 @@ def read_name_basics_df(spark: SparkSession) -> DataFrame:
         t.StructField("knownForTitles", t.StringType(), True)
     ])
     df = read_df(spark, schema, FILE_PATHS["name_basics"])
-    df = (
-        df
-        .withColumn(
-            "primaryProfession",
-            F.split(F.col("primaryProfession"), ",")
-        )
-        .withColumn(
-            "knownForTitles",
-            F.split(F.col("knownForTitles"), ",")
-        )
-    )
+    df = string_to_array_df(df, ["primaryProfession", "knownForTitles"])
     return df
 
 def read_title_akas_df(spark: SparkSession) -> DataFrame:
@@ -50,16 +41,9 @@ def read_title_akas_df(spark: SparkSession) -> DataFrame:
         t.StructField("isOriginalTitle", t.IntegerType(), True),
     ])
     df = read_df(spark, schema, FILE_PATHS["title_akas"])
+    df = string_to_array_df(df, ["types", "attributes"])
     df = (
         df
-        .withColumn(
-            "types",
-            F.split(F.col("types"), ",")
-        )
-        .withColumn(
-            "attributes",
-            F.split(F.col("attributes"), ",")
-        )
         .withColumn(
             "isOriginalTitle",
             F.col("isOriginalTitle") == 1
@@ -80,15 +64,12 @@ def read_title_basics_df(spark: SparkSession) -> DataFrame:
         t.StructField("genres", t.StringType(), True),
     ])
     df = read_df(spark, schema, FILE_PATHS["title_basics"])
+    df = string_to_array_df(df, "genres")
     df = (
         df
         .withColumn(
             "isAdult",
             F.col("isAdult") == 1
-        )
-        .withColumn(
-            "genres",
-            F.split(F.col("genres"), ",")
         )
     )
     return df
@@ -100,17 +81,7 @@ def read_title_crew_df(spark: SparkSession) -> DataFrame:
         t.StructField("writers", t.StringType(), True)
     ])
     df = read_df(spark, schema, FILE_PATHS["title_crew"])
-    df = (
-        df
-        .withColumn(
-            "directors",
-            F.split(F.col("directors"), ",")
-        )
-        .withColumn(
-            "writers",
-            F.split(F.col("writers"), ",")
-        )
-    )
+    df = string_to_array_df(df, ["directors", "writers"])
     return df
 
 def read_title_episode_df(spark: SparkSession) -> DataFrame:
@@ -155,30 +126,13 @@ def write_df(df: DataFrame, path):
     )
 
 def write_name_basics_df(df: DataFrame):
-    transformed_df = (
-        df
-        .withColumn(
-            "primaryProfession",
-            F.array_join(F.col("primaryProfession"), ",")
-        )
-        .withColumn(
-            "knownForTitles",
-            F.array_join(F.col("knownForTitles"), ",")
-        )
-    )
-    write_df(transformed_df, RESULTS_FILE_PATHS["name_basics"])
+    df = array_to_string_df(df, ["primaryProfession", "knownForTitles"])
+    write_df(df, RESULTS_FILE_PATHS["name_basics"])
 
 def write_title_akas_df(df: DataFrame):
+    df = array_to_string_df(df, ["types", "attributes"])
     transformed_df = (
         df
-        .withColumn(
-            "types",
-            F.array_join(F.col("types"), ",")
-        )
-        .withColumn(
-            "attributes",
-            F.array_join(F.col("attributes"), ",")
-        )
         .withColumn(
             "isOriginalTitle",
             F.when(
@@ -190,6 +144,7 @@ def write_title_akas_df(df: DataFrame):
     write_df(transformed_df, RESULTS_FILE_PATHS["title_akas"])
 
 def write_title_basics_df(df: DataFrame):
+    df = array_to_string_df(df, "genres")
     transformed_df = (
         df
         .withColumn(
@@ -199,26 +154,12 @@ def write_title_basics_df(df: DataFrame):
                 1
             ).otherwise(0)
         )
-        .withColumn(
-            "genres",
-            F.array_join(F.col("genres"), ",")
-        )
     )
     write_df(transformed_df, RESULTS_FILE_PATHS["title_basics"])
 
 def write_title_crew_df(df: DataFrame):
-    transformed_df = (
-        df
-        .withColumn(
-            "directors",
-            F.array_join(F.col("directors"), ",")
-        )
-        .withColumn(
-            "writers",
-            F.array_join(F.col("writers"), ",")
-        )
-    )
-    write_df(transformed_df, RESULTS_FILE_PATHS["title_crew"])
+    df = array_to_string_df(df, ["directors", "writers"])
+    write_df(df, RESULTS_FILE_PATHS["title_crew"])
 
 def write_title_episode_df(df: DataFrame):
     write_df(df, RESULTS_FILE_PATHS["title_episode"])
