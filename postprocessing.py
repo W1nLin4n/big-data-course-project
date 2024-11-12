@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from typing import Any
 
 from pyspark.sql import DataFrame
 from pyspark.sql import functions as F
@@ -83,4 +84,24 @@ def snake_to_camel_case_df(df: DataFrame) -> DataFrame:
                 snake_to_camel_case(col)
             )
         )
+    return df
+
+def remove_null_col(df: DataFrame, cols: list[str] | str) -> DataFrame:
+    if type(cols) == str:
+        cols = [cols]
+    for col in cols:
+        df = df.drop(F.col(col))
+    return df
+
+def remove_null_row(df: DataFrame, cols: list[str] | str) -> DataFrame:
+    if type(cols) == str:
+        cols = [cols]
+    df = df.dropna(how="any", subset=cols)
+    return df
+
+def fill_null_col(df: DataFrame, cols_vals: list[tuple[str, Any]] | tuple[str, Any]) -> DataFrame:
+    if type(cols_vals) == tuple:
+        cols_vals = [cols_vals]
+    for (col, val) in cols_vals:
+        df = df.fillna(val, col)
     return df
