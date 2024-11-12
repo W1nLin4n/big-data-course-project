@@ -8,13 +8,13 @@
 4. How many actors/actresses from each age bracket star in a film on average?
 5. Which film is the most popular in each year?
 6. What is the average amount of seasons for TV series?
-7. How does the amount of people working on a film affect its popularity?#
-8. Which 5 countries produce the most popular titles?
+7. How does the amount of people working on a film affect its popularity?
+8. Which 5 regions are the most popular translation targets?
 9. Which 5 actors/actresses are rated the highest?
 10. How does the film's length influence its rating?
 11. How many episodes are there in a TV series season on average?
 12. What is the average number of titles an actor/actress stars in per year?
-13. How does the release month influence a film's popularity?
+13. How does the average popularity of films change through years?
 14. How many films are produced in each year?
 15. Which 10 combinations of two genres occur most frequently?
 16. Who are the directors of the 10 most popular films in the last 5 years?
