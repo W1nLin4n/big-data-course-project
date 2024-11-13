@@ -104,7 +104,7 @@ def read_title_ratings_df(spark: SparkSession) -> DataFrame:
     schema = t.StructType([
         t.StructField("tconst", t.StringType(), False),
         t.StructField("averageRating", t.FloatType(), True),
-        t.StructField("numVotes", t.StringType(), True)
+        t.StructField("numVotes", t.IntegerType(), True)
     ])
     df = read_df(spark, schema, FILE_PATHS["title_ratings"])
     df = camel_to_snake_case_df(df)
