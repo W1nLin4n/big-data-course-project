@@ -1,5 +1,5 @@
 # Spark project for Big Data university course
-### Made by Artem Hrechka
+### Made by Artem Hrechka [(Source)](https://github.com/W1nLin4n/big-data-course-project)
 
 ## Dataset description
 The dataset used for this task is [IMDb dataset](https://developer.imdb.com/non-commercial-datasets/). 
