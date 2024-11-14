@@ -1,10 +1,13 @@
+import os
+import shutil
+
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql import types as t
 from pyspark.sql import functions as F
 
 from postprocessing import string_to_array_df, array_to_string_df, int_to_bool_df, bool_to_int_df, \
     camel_to_snake_case_df, snake_to_camel_case_df
-from setting import FILE_PATHS, RESULTS_FILE_PATHS
+from setting import FILE_PATHS, RESULTS_FILE_PATHS, DATA_RESULTS_PATH
 
 
 def read_df(spark: SparkSession, schema: t.StructType, path: str) -> DataFrame:
@@ -153,3 +156,20 @@ def write_title_principals_df(df: DataFrame):
 def write_title_ratings_df(df: DataFrame):
     df = snake_to_camel_case_df(df)
     write_df(df, RESULTS_FILE_PATHS["title_ratings"])
+
+def write_request_df(name: str, df: DataFrame) -> DataFrame:
+    temp_folder = DATA_RESULTS_PATH + f"/{name}"
+    result_file = DATA_RESULTS_PATH + f"/{name}.tsv"
+    df.coalesce(1).write.csv(
+        path=temp_folder,
+        mode = "overwrite",
+        sep = "\t",
+        header = True,
+        nullValue = r"\N",
+        encoding = "utf-8"
+    )
+    for filename in os.listdir(temp_folder):
+        if filename.startswith("part-"):
+            part_file = temp_folder + f"/{filename}"
+            shutil.move(part_file, result_file)
+    shutil.rmtree(temp_folder)
